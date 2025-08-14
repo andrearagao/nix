@@ -111,7 +111,7 @@
 
     shellInit = ''
       set -x GOPATH $HOME/go
-      set -x PATH $HOME/.local/bin $GOPATH/bin $PATH
+      set -x PATH $HOME/.nix-profile/bin $HOME/.local/bin $GOPATH/bin /nix/var/nix/profiles/default/bin $PATH
       set -x EDITOR nvim
 
       # Custom fish greeting with fastfetch and fortune
@@ -272,6 +272,7 @@
         condition = "gitdir:/home/aragao/projects/work/";
         contents = {
           user = {
+            name = "andrearagao";
             email = "aragao@avaya.com";
             signingkey = "792E9235301AC862";
           };
@@ -736,4 +737,15 @@
 
   # Home Manager needs a bit of information about you and the paths it should manage
   programs.home-manager.enable = true;
+
+  # Chromium configuration with Vimium and Bitwarden plugins
+  programs.chromium = {
+    enable = true;
+    extensions = [
+      # Vimium - The Hacker's Browser
+      "dbepggeogbaibhgnhhndojpepiihcmeb"
+      # Bitwarden - Password Manager
+      "nngceckbapebfimnlniiiahkandclblb"
+    ];
+  };
 }

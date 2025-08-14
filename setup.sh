@@ -97,16 +97,58 @@ if [[ "$LIVE_MODE" == "true" ]]; then
     echo "Press Ctrl+C to exit live mode"
     echo ""
     
+    # Create a temporary script for the live mode command
+    LIVE_SCRIPT=$(mktemp)
+    cat > "$LIVE_SCRIPT" << 'EOF'
+#!/bin/bash
+# Debounce function to prevent multiple rapid executions
+if [[ -f /tmp/nix-live-mode.lock ]]; then
+    echo "⏳ Update already in progress, skipping..."
+    exit 0
+fi
+
+# Create lock file
+touch /tmp/nix-live-mode.lock
+
+echo "📄 Nix file changed - reapplying configuration..."
+echo "⏰ $(date)"
+
+# Apply configuration
+if nix --extra-experimental-features "nix-command flakes" run .#homeConfigurations.aragao.activationPackage 2>/dev/null; then
+    echo "✅ Configuration applied successfully!"
+else
+    echo "❌ Configuration failed - check your nix files"
+fi
+
+# Remove lock file after a short delay to allow for file operations to complete
+sleep 1
+rm -f /tmp/nix-live-mode.lock
+
+echo "👀 Watching for more changes..."
+echo ""
+EOF
+
+    chmod +x "$LIVE_SCRIPT"
+    
     # Monitor all .nix files and flake.lock for changes
-    find . -name "*.nix" -o -name "flake.lock" | entr -r bash -c '
-        echo "📄 Nix file changed - reapplying configuration..."
-        echo "⏰ $(date)"
-        if nix --extra-experimental-features "nix-command flakes" run .#homeConfigurations.aragao.activationPackage 2>/dev/null; then
-            echo "✅ Configuration applied successfully!"
-        else
-            echo "❌ Configuration failed - check your nix files"
-        fi
-        echo "👀 Watching for more changes..."
-        echo ""
-    '
+    # Alternative: Use inotifywait for more reliable file monitoring (if available)
+    if command -v inotifywait &> /dev/null; then
+        echo "🔍 Using inotifywait for file monitoring (more reliable)"
+        echo "👀 Waiting for file changes... (no initial update)"
+        while true; do
+            # Wait for file changes, then execute the update script
+            inotifywait -q -e modify,create,delete -r . --include=".*\.nix$" --include="flake\.lock" 2>/dev/null
+            if [[ $? -eq 0 ]]; then
+                "$LIVE_SCRIPT"
+            fi
+        done
+    else
+        echo "🔍 Using entr for file monitoring"
+        echo "👀 Waiting for file changes... (no initial update)"
+        # Use entr without -r flag to avoid automatic restarts
+        find . -name "*.nix" -o -name "flake.lock" | entr "$LIVE_SCRIPT"
+    fi
+    
+    # Clean up temporary script on exit
+    trap "rm -f '$LIVE_SCRIPT' /tmp/nix-live-mode.lock; echo '🧹 Cleaned up live mode files'; exit" INT TERM EXIT
 fi
