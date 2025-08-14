@@ -33,7 +33,7 @@ echo "ℹ️  Experimental features (nix-command flakes) will be enabled by Home
 # Check if home-manager is available
 if ! command -v home-manager &> /dev/null; then
     echo "📦 Home Manager not found, will use nix run..."
-    HM_CMD="nix --extra-experimental-features 'nix-command flakes' run home-manager/master --"
+    HM_CMD="nix --extra-experimental-features \"nix-command flakes\" run home-manager/master --"
 else
     echo "✅ Home Manager found"
     HM_CMD="home-manager"
