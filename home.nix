@@ -346,7 +346,7 @@
         HostName github.com
         User git
 
-      # GitHub personal account  
+      # GitHub personal account
       Host github-personal
         HostName github.com
         User git
@@ -616,6 +616,7 @@
     fortune
     entr
     code-cursor
+    claude-code
     vscode
     speedtest-cli
     lolcat
@@ -680,7 +681,7 @@
     services.notes-sync = {
       Unit = {
         Description = "Auto-sync notes repository";
-        After = [ "graphical-session.target" ];
+        After = ["graphical-session.target"];
       };
       Service = {
         Type = "oneshot";
@@ -693,22 +694,22 @@
         ExecStart = pkgs.writeShellScript "notes-sync" ''
           #!/bin/bash
           set -e
-          
+
           cd /home/aragao/projects/work/notes
-          
+
           # Check for both tracked changes and untracked files
           if ! git diff-index --quiet HEAD -- || [ -n "$(git ls-files --others --exclude-standard)" ]; then
             echo "Changes detected, committing and pushing..."
-            
+
             # Add all changes (including untracked files)
             git add -A
-            
+
             # Commit with timestamp
             git commit -m "Auto-sync: $(date)"
-            
+
             # Push to remote
             git push
-            
+
             echo "Notes synced successfully at $(date)"
             notify-send "📝 Notes Sync" "Notes synced successfully at $(date '+%H:%M')" --urgency=low
           else
@@ -728,7 +729,7 @@
         Persistent = true;
       };
       Install = {
-        WantedBy = [ "timers.target" ];
+        WantedBy = ["timers.target"];
       };
     };
   };
