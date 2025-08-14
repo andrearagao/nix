@@ -26,23 +26,12 @@ if ! command -v nix &> /dev/null; then
 fi
 
 echo "✅ Nix is installed"
-
-# Check if experimental features are available (will be enabled by Home Manager)
-echo "ℹ️  Experimental features (nix-command flakes) will be enabled by Home Manager"
-
-# Check if home-manager is available
-if ! command -v home-manager &> /dev/null; then
-    echo "📦 Home Manager not found, will use nix run..."
-    HM_CMD="nix --extra-experimental-features \"nix-command flakes\" run home-manager/master --"
-else
-    echo "✅ Home Manager found"
-    HM_CMD="home-manager"
-fi
+echo "ℹ️  Using direct flake activation (no separate Home Manager installation needed)"
 
 # Function to apply home manager configuration
 apply_config() {
     echo "📝 Applying configuration..."
-    if $HM_CMD switch --flake .#aragao -b backup; then
+    if nix --extra-experimental-features "nix-command flakes" run .#homeConfigurations.aragao.activationPackage; then
         echo "✅ Home Manager configuration applied successfully!"
         return 0
     else
@@ -82,7 +71,6 @@ if apply_config; then
         echo "   You may need to restart your shell or terminal"
     fi
     
-    
     echo ""
     echo "🎉 Setup complete!"
     echo ""
@@ -93,7 +81,8 @@ if apply_config; then
     echo ""
     echo "To make future changes:"
     echo "  - Edit home.nix"
-    echo "  - Run: home-manager switch --flake .#aragao"
+    echo "  - Run: nix run .#homeConfigurations.aragao.activationPackage"
+    echo "  - Or use the traditional: home-manager switch --flake .#aragao"
     echo ""
 else
     echo "❌ Failed to apply Home Manager configuration"
@@ -112,7 +101,7 @@ if [[ "$LIVE_MODE" == "true" ]]; then
     find . -name "*.nix" -o -name "flake.lock" | entr -r bash -c '
         echo "📄 Nix file changed - reapplying configuration..."
         echo "⏰ $(date)"
-        if '"$HM_CMD"' switch --flake .#aragao -b backup 2>/dev/null; then
+        if nix --extra-experimental-features "nix-command flakes" run .#homeConfigurations.aragao.activationPackage 2>/dev/null; then
             echo "✅ Configuration applied successfully!"
         else
             echo "❌ Configuration failed - check your nix files"
