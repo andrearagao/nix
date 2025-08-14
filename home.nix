@@ -12,6 +12,10 @@
     stateVersion = "23.11";
 
     sessionVariables = {
+      # Editor configuration
+      EDITOR = "nvim";
+      VISUAL = "nvim";
+
       # Wayland support for Electron applications
       NIXOS_OZONE_WL = "1";
 
@@ -256,7 +260,7 @@
     # Conditional includes for different directories
     includes = [
       {
-        condition = "gitdir:~/projects/personal/";
+        condition = "gitdir:/home/aragao/projects/personal/";
         contents = {
           user = {
             email = "andrearag@gmail.com";
@@ -265,7 +269,7 @@
         };
       }
       {
-        condition = "gitdir:~/projects/work/";
+        condition = "gitdir:/home/aragao/projects/work/";
         contents = {
           user = {
             email = "aragao@avaya.com";
@@ -324,6 +328,34 @@
     extraConfig = ''
       allow-loopback-pinentry
     '';
+    sshKeys = [
+      # Work key authentication subkey (keygrip: 13128BA224F28F0BF32C4015BB454EA017882BE4)
+      "13128BA224F28F0BF32C4015BB454EA017882BE4"
+      # Personal key main key with authentication capability (keygrip: 5E9AE8F42CC14E0DDFD195A13BC562A1659F9E42)
+      "5E9AE8F42CC14E0DDFD195A13BC562A1659F9E42"
+    ];
+  };
+
+  programs.ssh = {
+    enable = true;
+    controlMaster = "no";
+    controlPath = "none";
+    extraConfig = ''
+      # GitHub work account
+      Host github-work
+        HostName github.com
+        User git
+
+      # GitHub personal account  
+      Host github-personal
+        HostName github.com
+        User git
+
+      # Default GitHub (work account)
+      Host github.com
+        HostName github.com
+        User git
+    '';
   };
 
   programs.fzf = {
@@ -357,11 +389,11 @@
     historyLimit = 100000;
     keyMode = "vi";
     mouse = true;
-    prefix = "C-a";
+    #prefix = "C-b";
 
     extraConfig = ''
       # Rose Pine theme
-      set -g status-position bottom
+      set -g status-position top
       set -g status-bg "#191724"
       set -g status-fg "#e0def4"
       set -g status-left ""
@@ -402,12 +434,15 @@
       bind r source-file ~/.config/tmux/tmux.conf \; display "Config reloaded!"
 
       # Better splitting
-      bind | split-window -h -c "#{pane_current_path}"
-      bind - split-window -v -c "#{pane_current_path}"
+      #bind | split-window -h -c "#{pane_current_path}"
+      #bind - split-window -v -c "#{pane_current_path}"
 
       # Activity monitoring
       setw -g monitor-activity on
       set -g visual-activity on
+
+      bind-key -T copy-mode-vi v send-keys -X begin-selection
+      bind-key -T copy-mode-vi y send-keys -X copy-selection-and-cancel
     '';
 
     plugins = with pkgs.tmuxPlugins; [
@@ -590,6 +625,7 @@
     pciutils
     gdu
     yazi
+    cacert
 
     # Language servers
     nodejs_20
@@ -609,6 +645,9 @@
     awscli2
     azure-cli
     google-cloud-sdk
+    tilt
+    mkcert
+    istioctl
 
     # File management
     unzip
@@ -633,6 +672,64 @@
 
     settings = {
       experimental-features = ["nix-command" "flakes"];
+    };
+  };
+
+  # Systemd services
+  systemd.user = {
+    services.notes-sync = {
+      Unit = {
+        Description = "Auto-sync notes repository";
+        After = [ "graphical-session.target" ];
+      };
+      Service = {
+        Type = "oneshot";
+        WorkingDirectory = "/home/aragao/projects/work/notes";
+        Environment = [
+          "SSH_AUTH_SOCK=/run/user/1000/gnupg/S.gpg-agent.ssh"
+          "PATH=${pkgs.git}/bin:${pkgs.openssh}/bin:${pkgs.libnotify}/bin:${pkgs.coreutils}/bin"
+          "DISPLAY=:0"
+        ];
+        ExecStart = pkgs.writeShellScript "notes-sync" ''
+          #!/bin/bash
+          set -e
+          
+          cd /home/aragao/projects/work/notes
+          
+          # Check for both tracked changes and untracked files
+          if ! git diff-index --quiet HEAD -- || [ -n "$(git ls-files --others --exclude-standard)" ]; then
+            echo "Changes detected, committing and pushing..."
+            
+            # Add all changes (including untracked files)
+            git add -A
+            
+            # Commit with timestamp
+            git commit -m "Auto-sync: $(date)"
+            
+            # Push to remote
+            git push
+            
+            echo "Notes synced successfully at $(date)"
+            notify-send "📝 Notes Sync" "Notes synced successfully at $(date '+%H:%M')" --urgency=low
+          else
+            echo "No changes detected at $(date)"
+            # No notification when no changes
+          fi
+        '';
+      };
+    };
+
+    timers.notes-sync = {
+      Unit = {
+        Description = "Auto-sync notes repository timer";
+      };
+      Timer = {
+        OnCalendar = "*:0/15"; # Every 15 minutes
+        Persistent = true;
+      };
+      Install = {
+        WantedBy = [ "timers.target" ];
+      };
     };
   };
 
