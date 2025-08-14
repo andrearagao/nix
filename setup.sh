@@ -33,7 +33,7 @@ echo "ℹ️  Experimental features (nix-command flakes) will be enabled by Home
 # Check if home-manager is available
 if ! command -v home-manager &> /dev/null; then
     echo "📦 Home Manager not found, will use nix run..."
-    HM_CMD="nix run home-manager/master --"
+    HM_CMD="nix --extra-experimental-features 'nix-command flakes' run home-manager/master --"
 else
     echo "✅ Home Manager found"
     HM_CMD="home-manager"
@@ -51,17 +51,17 @@ apply_config() {
     fi
 }
 
-# Update flake inputs to latest versions
+# Update flake inputs to latest versions (using experimental features)
 echo "🔄 Updating flake inputs to latest versions..."
-if nix flake update; then
+if nix --extra-experimental-features "nix-command flakes" flake update; then
     echo "✅ Flake inputs updated"
 else
     echo "⚠️  Failed to update flake inputs, continuing with existing versions..."
 fi
 
-# Validate flake configuration
+# Validate flake configuration (using experimental features)
 echo "🔍 Validating flake configuration..."
-if ! nix flake check 2>/dev/null; then
+if ! nix --extra-experimental-features "nix-command flakes" flake check 2>/dev/null; then
     echo "❌ Flake validation failed. Please check your configuration."
     exit 1
 fi
@@ -82,48 +82,14 @@ if apply_config; then
         echo "   You may need to restart your shell or terminal"
     fi
     
-    # Check current shell and conditionally change to fish
-    CURRENT_SHELL=$(basename "$SHELL")
-    FISH_PATH="$HOME/.nix-profile/bin/fish"
-    
-    if [ "$CURRENT_SHELL" != "fish" ] && [ -x "$FISH_PATH" ]; then
-        echo ""
-        echo "🐟 Your current shell is $CURRENT_SHELL"
-        read -p "Would you like to set fish as your default shell? (Y/n): " -n 1 -r
-        echo
-        if [[ $REPLY =~ ^[Nn]$ ]]; then
-            echo "Keeping $CURRENT_SHELL as default shell"
-        else
-            echo "Setting fish as default shell..."
-            
-            # Add fish to /etc/shells if not already there
-            if ! grep -q "$FISH_PATH" /etc/shells 2>/dev/null; then
-                echo "Adding $FISH_PATH to /etc/shells (requires sudo)..."
-                echo "$FISH_PATH" | sudo tee -a /etc/shells > /dev/null
-            fi
-            
-            # Change user's default shell
-            if chsh -s "$FISH_PATH" 2>/dev/null; then
-                echo "✅ Default shell changed to fish"
-            else
-                echo "⚠️  Could not change default shell automatically"
-                echo "   Please run: chsh -s $FISH_PATH"
-            fi
-        fi
-    elif [ "$CURRENT_SHELL" = "fish" ]; then
-        echo "✅ Fish is already your default shell"
-    elif [ ! -x "$FISH_PATH" ]; then
-        echo "⚠️  Fish executable not found at expected location"
-        echo "   You may need to restart your terminal and try: chsh -s \$(which fish)"
-    fi
     
     echo ""
     echo "🎉 Setup complete!"
     echo ""
     echo "Next steps:"
     echo "  1. Update your Git email in home.nix if needed"
-    echo "  2. Log out and log back in (or restart terminal) for default shell change"
-    echo "  3. Your fish shell is configured with custom aliases and prompt"
+    echo "  2. Restart your terminal to apply all changes"
+    echo "  3. Your fish shell is available with custom aliases and prompt"
     echo ""
     echo "To make future changes:"
     echo "  - Edit home.nix"
