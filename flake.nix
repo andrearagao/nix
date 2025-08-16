@@ -8,16 +8,26 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     flake-utils.url = "github:numtide/flake-utils";
+
   };
 
-  outputs = { self, nixpkgs, home-manager, flake-utils }:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      home-manager,
+      flake-utils,
+    }:
     {
       # Home Manager configurations (not system-specific)
       homeConfigurations.aragao = home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.aarch64-linux;
         modules = [ ./home.nix ];
+
       };
-    } // flake-utils.lib.eachDefaultSystem (system:
+    }
+    // flake-utils.lib.eachDefaultSystem (
+      system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
       in
@@ -37,5 +47,6 @@
             echo "  home-manager build --flake .#aragao"
           '';
         };
-      });
+      }
+    );
 }

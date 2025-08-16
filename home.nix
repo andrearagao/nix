@@ -22,7 +22,6 @@
 
       # General Wayland environment
       XDG_SESSION_TYPE = "wayland";
-      QT_QPA_PLATFORM = "wayland";
       GDK_BACKEND = "wayland";
       CLUTTER_BACKEND = "wayland";
 
@@ -133,6 +132,11 @@
 
       # File manager
       y = "yazi";
+
+      # Browser shortcuts
+      qb = "qutebrowser";
+      qbw = "qutebrowser --temp-window";
+      qbp = "qutebrowser --private";
 
       # Bitwarden CLI shortcuts
       bw = "bitwarden";
@@ -730,6 +734,26 @@
     alejandra
     nixfmt
 
+    # OpenGL and graphics libraries
+    mesa
+    libGL
+    libGLU
+    freeglut
+    glew
+    glfw
+    vulkan-loader
+    vulkan-tools
+    # Additional graphics utilities
+    glxinfo
+    mesa-demos
+    # Additional graphics support
+    libgbm
+    xorg.xdriinfo
+    # Wayland graphics support
+    wayland
+    wayland-protocols
+    weston
+
     # Common development tools
     curl
     wget
@@ -761,6 +785,9 @@
     nodePackages.typescript-language-server
     nodePackages.bash-language-server
     marksman
+
+    # Fonts
+    fira-code
 
     # Java development tools
     jdk17
@@ -794,7 +821,7 @@
     ollama
 
     obsidian
-    chromium
+    neovide
 
     # Password Management
     bitwarden-cli
@@ -993,7 +1020,9 @@
         "**/build" = true;
       };
 
-      "terminal.integrated.defaultProfile.linux" = "bash";
+      "terminal.integrated.defaultProfile.linux" = "fish";
+      "terminal.integrated.profiles.linux.fish.path" = "/home/aragao/.nix-profile/bin/fish";
+      "terminal.integrated.profiles.linux.fish.args" = [ "-l" ];
       "terminal.integrated.profiles.linux.bash.path" = "/usr/bin/bash";
       "terminal.integrated.profiles.linux.bash.args" = [ "-l" ];
 
@@ -1093,6 +1122,15 @@
 
       # Disable built-in Vim to prevent conflicts with vscode-neovim
       "vim.enabled" = false;
+
+      # Disable automatic updates for Cursor
+      "update.mode" = "none";
+      "update.showReleaseNotes" = false;
+      "extensions.autoUpdate" = false;
+      "extensions.autoCheckUpdates" = false;
+
+      # Editor line numbers
+      "editor.lineNumbers" = "relative";
 
     };
   };
