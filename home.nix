@@ -2,7 +2,8 @@
   config,
   pkgs,
   ...
-}: {
+}:
+{
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
@@ -33,8 +34,19 @@
       SDL_VIDEODRIVER = "wayland";
       _JAVA_AWT_WM_NONREPARENTING = "1";
 
+      # Java development environment
+      JAVA_HOME = "${pkgs.jdk17}";
+      JAVA_OPTS = "-Xmx4g -XX:+UseG1GC";
+
       # Make Nix applications visible to application launchers
       XDG_DATA_DIRS = "$HOME/.nix-profile/share:$XDG_DATA_DIRS";
+
+      # Bitwarden configuration
+      BW_SESSION = "";
+      BW_CLIENTSECRET = "";
+      BW_URL = "https://vw.faragao.net"; # Your custom Bitwarden server
+      BW_USER = "andre@faragao.net"; # Your Bitwarden email
+      # Note: You can also use 'bwserver <url>' command to configure the server dynamically
     };
   };
 
@@ -105,8 +117,31 @@
       tfv = "terraform validate";
       tff = "terraform fmt";
 
+      # Java development aliases
+      jc = "javac";
+      jr = "java";
+      jd = "javadoc";
+      jp = "javap";
+      jh = "javah";
+      jps = "jps";
+      jstack = "jstack";
+      jmap = "jmap";
+      jstat = "jstat";
+      mvn = "mvn";
+      gradle = "gradle";
+      spring = "spring";
+
       # File manager
       y = "yazi";
+
+      # Bitwarden CLI shortcuts
+      bw = "bitwarden";
+      bwl = "bitwarden login";
+      bws = "bitwarden sync";
+      bwg = "bitwarden get";
+      bwc = "bitwarden create";
+      bwe = "bitwarden edit";
+      bwd = "bitwarden delete";
     };
 
     shellInit = ''
@@ -160,6 +195,73 @@
         end
         kubectl wait --for=condition=ready $argv[1] --timeout=300s
       '';
+
+      # Bitwarden utility functions
+      bwlogin = ''
+        echo "🔐 Logging into Bitwarden..."
+        echo "Server: $BW_URL"
+        echo "User: $BW_USER"
+        bitwarden login --raw
+        if test $status -eq 0
+          echo "✅ Login successful!"
+          echo "🔄 Syncing with server..."
+          bitwarden sync
+        else
+          echo "❌ Login failed"
+        end
+      '';
+
+      bwsearch = ''
+        if test (count $argv) -lt 1
+          echo "Usage: bwsearch <search-term>"
+          return 1
+        end
+        echo "🔍 Searching Bitwarden for: $argv[1]"
+        bitwarden list items --search $argv[1]
+      '';
+
+      bwget = ''
+        if test (count $argv) -lt 1
+          echo "Usage: bwget <item-name>"
+          return 1
+        end
+        echo "🔑 Getting credentials for: $argv[1]"
+        bitwarden get item $argv[1]
+      '';
+
+      bwpass = ''
+        if test (count $argv) -lt 1
+          echo "Usage: bwpass <item-name>"
+          return 1
+        end
+        echo "🔑 Getting password for: $argv[1]"
+        bitwarden get password $argv[1] | tr -d '\n' | wl-copy
+        echo "✅ Password copied to clipboard!"
+      '';
+
+      bwserver = ''
+        if test (count $argv) -lt 1
+          echo "Usage: bwserver <server-url>"
+          echo "Example: bwserver https://vault.company.com"
+          return 1
+        end
+        echo "🔧 Configuring Bitwarden server: $argv[1]"
+        bitwarden config server $argv[1]
+        if test $status -eq 0
+          echo "✅ Server configured successfully!"
+          echo "🔄 Syncing with new server..."
+          bitwarden sync
+        else
+          echo "❌ Failed to configure server"
+        end
+      '';
+
+      bwstatus = ''
+        echo "🔍 Bitwarden Status:"
+        echo "Server: $(bitwarden config server)"
+        echo "User: $(bitwarden config user)"
+        echo "Sync Status: $(bitwarden sync --last)"
+      '';
     };
 
     interactiveShellInit = ''
@@ -183,7 +285,9 @@
       format = ''
         [](bold cyan) $directory$cmd_duration$all$kubernetes$azure$docker_context$time
         $character'';
-      directory = {home_symbol = " ";};
+      directory = {
+        home_symbol = " ";
+      };
       golang = {
         #style = "bg:#79d4fd fg:#000000";
         style = "fg:#79d4fd";
@@ -221,7 +325,9 @@
         #style = "fg:#1d63ed";
         format = "[ 󰡨 ($context) ]($style)";
       };
-      gcloud = {disabled = true;};
+      gcloud = {
+        disabled = true;
+      };
       hostname = {
         ssh_only = true;
         format = "<[$hostname]($style)";
@@ -229,7 +335,9 @@
         style = "bold dimmed fg:white";
         disabled = true;
       };
-      line_break = {disabled = true;};
+      line_break = {
+        disabled = true;
+      };
       username = {
         style_user = "bold dimmed fg:blue";
         show_always = false;
@@ -545,27 +653,42 @@
         rules = [
           {
             name = "*/";
-            use = ["edit" "open"];
+            use = [
+              "edit"
+              "open"
+            ];
           }
           {
             mime = "text/*";
-            use = ["edit" "open"];
+            use = [
+              "edit"
+              "open"
+            ];
           }
           {
             mime = "image/*";
-            use = ["open"];
+            use = [ "open" ];
           }
           {
             mime = "video/*";
-            use = ["play" "open"];
+            use = [
+              "play"
+              "open"
+            ];
           }
           {
             mime = "audio/*";
-            use = ["play" "open"];
+            use = [
+              "play"
+              "open"
+            ];
           }
           {
             mime = "inode/x-empty";
-            use = ["edit" "open"];
+            use = [
+              "edit"
+              "open"
+            ];
           }
         ];
       };
@@ -573,17 +696,20 @@
     keymap = {
       mgr.prepend_keymap = [
         {
-          on = ["l"];
+          on = [ "l" ];
           run = "plugin --sync smart-enter";
           desc = "Enter the child directory, or open the file";
         }
         {
-          on = ["g" "g"];
+          on = [
+            "g"
+            "g"
+          ];
           run = "arrow -99999999";
           desc = "Move cursor to the top";
         }
         {
-          on = ["G"];
+          on = [ "G" ];
           run = "arrow 99999999";
           desc = "Move cursor to the bottom";
         }
@@ -602,6 +728,7 @@
     # Nix development tools
     nil
     alejandra
+    nixfmt
 
     # Common development tools
     curl
@@ -635,6 +762,13 @@
     nodePackages.bash-language-server
     marksman
 
+    # Java development tools
+    jdk17
+    maven
+    gradle
+    spring-boot-cli
+    lombok
+
     # Cloud development tools
     kubectl
     kubernetes-helm
@@ -654,12 +788,17 @@
     # File management
     unzip
     zip
+    wl-clipboard
 
     # AI/ML tools
     ollama
 
     obsidian
     chromium
+
+    # Password Management
+    bitwarden-cli
+    bitwarden
   ];
 
   # Nix configuration
@@ -673,7 +812,10 @@
     };
 
     settings = {
-      experimental-features = ["nix-command" "flakes"];
+      experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
     };
   };
 
@@ -682,7 +824,7 @@
     services.notes-sync = {
       Unit = {
         Description = "Auto-sync notes repository";
-        After = ["graphical-session.target"];
+        After = [ "graphical-session.target" ];
       };
       Service = {
         Type = "oneshot";
@@ -730,7 +872,7 @@
         Persistent = true;
       };
       Install = {
-        WantedBy = ["timers.target"];
+        WantedBy = [ "timers.target" ];
       };
     };
   };
@@ -747,5 +889,211 @@
       # Bitwarden - Password Manager
       "nngceckbapebfimnlniiiahkandclblb"
     ];
+  };
+
+  # Cursor configuration with automatic extension management
+  # Using programs.vscode since Cursor is VS Code-based
+  programs.vscode = {
+    enable = true;
+    package = pkgs.code-cursor;
+
+    # Automatically install and configure extensions
+    # Perfectly aligned with CLI tools installed via Nix
+    profiles.default.extensions = with pkgs.vscode-extensions; [
+      # Nix development (matches: nil, alejandra)
+      jnoortheen.nix-ide
+
+      # Go development (matches: go, gopls, go-tools, delve, golangci-lint)
+      golang.go
+
+      # Language servers (matches: typescript-language-server, bash-language-server, marksman)
+      zainchen.json
+      redhat.vscode-yaml
+
+      # Cloud development (matches: kubectl, helm, docker, terraform, aws, azure, gcloud)
+      ms-azuretools.vscode-docker
+      ms-kubernetes-tools.vscode-kubernetes-tools
+      hashicorp.terraform
+
+      # Web development (matches: nodejs_20)
+      bradlc.vscode-tailwindcss
+      esbenp.prettier-vscode
+
+      # Java development (comprehensive Java tooling)
+      redhat.java
+      vscjava.vscode-java-debug
+      vscjava.vscode-java-test
+      vscjava.vscode-java-dependency
+      vscjava.vscode-maven
+      vscjava.vscode-gradle
+
+      # Neovim keybindings (for consistent editing experience)
+      vscodevim.vim
+
+      # vscode-neovim for full Neovim experience
+      asvetliakov.vscode-neovim
+
+      # UI enhancements
+      pkief.material-icon-theme
+    ];
+
+    # User settings that will be automatically applied
+    profiles.default.userSettings = {
+      "nix.enable" = true;
+      "nix.serverPath" = "nil";
+      "nix.formatterPath" = "nixfmt";
+      "nix.serverSettings.nil.formatting.command" = [ "nixfmt" ];
+      "nix.serverSettings.nil.diagnostics.ignored" = [
+        "unused_binding"
+        "unused_with"
+      ];
+
+      # Alternative formatter options (you can change the above to use alejandra instead)
+      # "nix.formatterPath" = "alejandra";
+      # "nix.serverSettings.nil.formatting.command" = ["alejandra"];
+
+      "files.associations" = {
+        "*.nix" = "nix";
+        "flake.lock" = "json";
+        "*.flake" = "nix";
+      };
+
+      "editor.formatOnSave" = true;
+      "editor.formatOnPaste" = true;
+      "editor.codeActionsOnSave.source.fixAll" = "explicit";
+      "editor.codeActionsOnSave.source.organizeImports" = "explicit";
+      "editor.rulers" = [
+        80
+        100
+      ];
+      "editor.tabSize" = 2;
+      "editor.insertSpaces" = true;
+      "editor.detectIndentation" = false;
+
+      "files.trimTrailingWhitespace" = true;
+      "files.insertFinalNewline" = true;
+
+      "search.exclude" = {
+        "**/result" = true;
+        "**/result-*" = true;
+        "**/.git" = true;
+        "**/node_modules" = true;
+        "**/target" = true;
+        "**/dist" = true;
+        "**/build" = true;
+      };
+
+      "files.exclude" = {
+        "**/result" = true;
+        "**/result-*" = true;
+        "**/.git" = true;
+        "**/node_modules" = true;
+        "**/target" = true;
+        "**/dist" = true;
+        "**/build" = true;
+      };
+
+      "terminal.integrated.defaultProfile.linux" = "bash";
+      "terminal.integrated.profiles.linux.bash.path" = "/usr/bin/bash";
+      "terminal.integrated.profiles.linux.bash.args" = [ "-l" ];
+
+      "workbench.colorTheme" = "Default Dark+";
+      "workbench.iconTheme" = "material-icon-theme";
+
+      "git.enableSmartCommit" = true;
+      "git.autofetch" = true;
+      "git.confirmSync" = false;
+
+      "go.useLanguageServer" = true;
+      "go.toolsManagement.checkForUpdates" = "local";
+      "go.formatTool" = "goimports";
+      "go.lintTool" = "golangci-lint";
+      "go.lintOnSave" = "package";
+      "go.vetOnSave" = "package";
+      "go.testOnSave" = false;
+      "go.coverOnSave" = false;
+      "go.buildOnSave" = "package";
+      "go.installDependenciesWhenBuilding" = true;
+      "go.gopath" = "/home/aragao/go";
+      "go.gocodeAutoBuild" = false;
+
+      "terraform.languageServer.enabled" = true;
+      "terraform.languageServer.args" = [ "serve" ];
+      "terraform.format.enabled" = true;
+      "terraform.format.formatOnSave" = true;
+      "terraform.format.ignoreExtensionsOnSave" = [ ".tfsmurf" ];
+
+      "yaml.format.enable" = true;
+      "yaml.format.singleQuote" = false;
+      "yaml.format.bracketSpacing" = true;
+      "yaml.format.proseWrap" = "preserve";
+      "yaml.validate" = true;
+      "yaml.schemas" = {
+        "https://json.schemastore.org/github-workflow.json" = ".github/workflows/*.{yml,yaml}";
+        "https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json" =
+          "**/docker-compose*.{yml,yaml}";
+        "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/kubernetes.json" =
+          "**/*.k8s.{yml,yaml}";
+      };
+
+      # Java development settings
+      "java.home" = "";
+      "java.configuration.updateBuildConfiguration" = "automatic";
+      "java.compile.nullAnalysis.mode" = "automatic";
+      "java.format.settings.url" =
+        "https://raw.githubusercontent.com/google/styleguide/gh-pages/eclipse-java-google-style.xml";
+      "java.format.settings.profile" = "GoogleStyle";
+
+      # Vim keybindings
+      "vim.useSystemClipboard" = true;
+      "vim.hlsearch" = true;
+      "vim.incsearch" = true;
+      "vim.ignorecase" = true;
+      "vim.smartcase" = true;
+      "vim.easymotion" = true;
+      "vim.leader" = "<space>";
+      "vim.whichwrap" = "b,s,h,l,<,>,[,]";
+      "vim.wrap" = true;
+      "vim.visualbell" = true;
+      "vim.errorbells" = false;
+
+      # Language server settings (aligned with CLI tools)
+      "typescript.preferences.includePackageJsonAutoImports" = "auto";
+      "typescript.suggest.autoImports" = true;
+      "typescript.updateImportsOnFileMove.enabled" = "always";
+      "typescript.preferences.importModuleSpecifier" = "relative";
+
+      # Bash language server (matches: bash-language-server)
+      "bashIde.path" = "bash-language-server";
+
+      # Markdown language server (matches: marksman)
+      "markdown.preview.breaks" = true;
+      "markdown.preview.linkify" = true;
+
+      # Kubernetes settings (matches: kubectl, helm, k9s)
+      "vs-kubernetes.kubectl-path" = "kubectl";
+      "vs-kubernetes.helm-path" = "helm";
+      "vs-kubernetes.minikube-path" = "minikube";
+      "vs-kubernetes.outputFormat" = "yaml";
+
+      # vscode-neovim configuration with performance optimizations
+      "vscode-neovim.enable" = true;
+      "vscode-neovim.useWSL" = false;
+      "vscode-neovim.highlightGroups.highlights" = [ ];
+
+      # Performance optimizations for vscode-neovim
+      "vscode-neovim.affinity" = "default";
+      "vscode-neovim.performance" = {
+        "enable" = true;
+        "affinity" = "default";
+        "maxBufferLines" = 10000;
+        "maxBufferSize" = 1000000;
+        "maxFileSize" = 1000000;
+      };
+
+      # Disable built-in Vim to prevent conflicts with vscode-neovim
+      "vim.enabled" = false;
+
+    };
   };
 }

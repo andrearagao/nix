@@ -70,7 +70,7 @@ if apply_config; then
         echo "⚠️  Nix experimental features may not be fully applied"
         echo "   You may need to restart your shell or terminal"
     fi
-    
+
     echo ""
     echo "🎉 Setup complete!"
     echo ""
@@ -96,7 +96,7 @@ if [[ "$LIVE_MODE" == "true" ]]; then
     echo "🔄 Entering live mode - monitoring nix files for changes..."
     echo "Press Ctrl+C to exit live mode"
     echo ""
-    
+
     # Create a temporary script for the live mode command
     LIVE_SCRIPT=$(mktemp)
     cat > "$LIVE_SCRIPT" << 'EOF'
@@ -114,10 +114,12 @@ echo "📄 Nix file changed - reapplying configuration..."
 echo "⏰ $(date)"
 
 # Apply configuration
-if nix --extra-experimental-features "nix-command flakes" run .#homeConfigurations.aragao.activationPackage 2>/dev/null; then
+if nix --extra-experimental-features "nix-command flakes" run .#homeConfigurations.aragao.activationPackage 2>&1; then
     echo "✅ Configuration applied successfully!"
 else
     echo "❌ Configuration failed - check your nix files"
+    echo "📋 Error details were shown above"
+    echo "🔄 Continuing to monitor for file changes..."
 fi
 
 # Remove lock file after a short delay to allow for file operations to complete
@@ -129,7 +131,7 @@ echo ""
 EOF
 
     chmod +x "$LIVE_SCRIPT"
-    
+
     # Monitor all .nix files and flake.lock for changes
     # Alternative: Use inotifywait for more reliable file monitoring (if available)
     if command -v inotifywait &> /dev/null; then
@@ -148,7 +150,7 @@ EOF
         # Use entr without -r flag to avoid automatic restarts
         find . -name "*.nix" -o -name "flake.lock" | entr "$LIVE_SCRIPT"
     fi
-    
+
     # Clean up temporary script on exit
     trap "rm -f '$LIVE_SCRIPT' /tmp/nix-live-mode.lock; echo '🧹 Cleaned up live mode files'; exit" INT TERM EXIT
 fi
