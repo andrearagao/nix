@@ -533,98 +533,16 @@
 
   programs.tmux = {
     enable = true;
-    terminal = "tmux-256color";
-    historyLimit = 100000;
     keyMode = "vi";
-    mouse = true;
-    #prefix = "C-b";
-
-    extraConfig = ''
-      # Rose Pine theme
-      set -g status-position top
-      set -g status-bg "#191724"
-      set -g status-fg "#e0def4"
-      set -g status-left "#[fg=blue,bold,bg=default] #S "
-      set -g status-right "#(tmux-right-status)#[fg=#9ccfd8,bg=#393552] %Y-%m-%d #[fg=#f6c177,bg=#393552] %H:%M:%S "
-      set -g status-right-length 50
-      set -g status-left-length 20
-
-      setw -g window-status-current-format " #[fg=#eb6f92,bg=#393552]#I#[fg=#e0def4,bg=#393552] #[fg=#e0def4,bg=#393552]#(tmux-window-icons #W) #[fg=#c4a7e7,bg=#393552]#F "
-      setw -g window-status-format " #[fg=#6e6a86]#I#[fg=#6e6a86] #(tmux-window-icons #W) #[fg=#6e6a86]#F "
-
-      # Pane borders
-      set -g pane-border-style "fg=#393552"
-      set -g pane-active-border-style "fg=#9ccfd8"
-
-      # Message colors
-      set -g message-style "fg=#e0def4,bg=#393552"
-      set -g message-command-style "fg=#e0def4,bg=#393552"
-
-      # Sensible configurations
-      set -s escape-time 0
-      set -g display-time 4000
-      set -g status-interval 5
-      set -g default-terminal "screen-256color"
-      set -ga terminal-overrides ",xterm-256color:Tc"
-
-      # Better indexing
-      set -g base-index 1
-      setw -g pane-base-index 1
-
-      # Renumber windows when a window is closed
-      set -g renumber-windows on
-
-      # Easier and faster switching between next/prev window
-      bind C-p previous-window
-      bind C-n next-window
-
-      # Custom tmux sessionizer binding
-      bind -r D neww -c "#{pane_current_path}" "[[ -e TODO.md ]] && nvim TODO.md || nvim ~/src/notes/todo.md"
-      bind -r f display-popup -E "tmux-sessionizer"
-
-      # Source config file
-      bind r source-file ~/.config/tmux/tmux.conf \; display "Config reloaded!"
-
-      # Better splitting
-      bind % split-window -h -c "#{pane_current_path}"
-      bind '"' split-window -p 30 -v -c "#{pane_current_path}"
-      bind c new-window -c "#{pane_current_path}"
-
-      # Activity monitoring
-      setw -g monitor-activity on
-      set -g visual-activity on
-
-      bind-key -T copy-mode-vi v send-keys -X begin-selection
-      bind-key -T copy-mode-vi y send-keys -X copy-selection-and-cancel
-
-      # vim-like pane switching
-      bind -r ^ last-window
-      bind -r k select-pane -U
-      bind -r j select-pane -D
-      bind -r h select-pane -L
-      bind -r l select-pane -R
-    '';
-
-    plugins = with pkgs.tmuxPlugins; [
-      sensible
-      vim-tmux-navigator
-      {
-        plugin = tmux-fzf;
-        extraConfig = ''
-          # Tmux FZF bindings
-          set -g @tmux-fzf-launch-key 'C-f'
-        '';
-      }
-      {
-        plugin = better-mouse-mode;
-        extraConfig = ''
-          set -g @scroll-speed-num-lines-per-scroll 1
-          set -g @scroll-without-changing-pane on
-          set -g @scroll-in-moused-over-pane on
-          set -g @emulate-scroll-for-no-mouse-alternate-buffer on
-        '';
-      }
+    plugins = with pkgs; [
+      tmuxPlugins.better-mouse-mode
+      tmuxPlugins.sensible
+      tmuxPlugins.vim-tmux-navigator
+      tmuxPlugins.resurrect
+      tmuxPlugins.tmux-fzf
+      tmuxPlugins.continuum
     ];
+    extraConfig = builtins.readFile ./tmux/tmux.conf;
   };
 
   programs.neovim = {
