@@ -27,6 +27,60 @@ function Lsp()
 			capabilities = {},
 			servers = {
 				marksman = {},
+				ts_ls = {
+					settings = {
+						typescript = {
+							inlayHints = {
+								includeInlayParameterNameHints = "all",
+								includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+								includeInlayFunctionParameterTypeHints = true,
+								includeInlayVariableTypeHints = true,
+								includeInlayPropertyDeclarationTypeHints = true,
+								includeInlayFunctionLikeReturnTypeHints = true,
+								includeInlayEnumMemberValueHints = true,
+							},
+						},
+						javascript = {
+							inlayHints = {
+								includeInlayParameterNameHints = "all",
+								includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+								includeInlayFunctionParameterTypeHints = true,
+								includeInlayVariableTypeHints = true,
+								includeInlayPropertyDeclarationTypeHints = true,
+								includeInlayFunctionLikeReturnTypeHints = true,
+								includeInlayEnumMemberValueHints = true,
+							},
+						},
+					},
+				},
+				pylsp = {
+					settings = {
+						pylsp = {
+							plugins = {
+								pycodestyle = {
+									ignore = {"W391"},
+									maxLineLength = 100,
+								},
+								pylint = {
+									enabled = true,
+									args = {"--max-line-length=100"},
+								},
+								pyflakes = {
+									enabled = true,
+								},
+								autopep8 = {
+									enabled = true,
+								},
+								yapf = {
+									enabled = false,
+								},
+								black = {
+									enabled = false,
+								},
+							},
+						},
+					},
+				},
 				lua_ls = {
 					settings = {
 						Lua = {
