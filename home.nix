@@ -334,17 +334,17 @@
         symbol = " ";
       };
       git_status = {
-        disabled = false;
+        disabled = true;
       };
       git_branch = {
-        disabled = false;
+        disabled = true;
         symbol = " ";
         #style = "bg:#f34c28 fg:#413932";
         style = "fg:#f34c28";
         format = "[  $symbol$branch(:$remote_branch)]($style)";
       };
       azure = {
-        disabled = false;
+        disabled = true;
         #style = "fg:#ffffff bg:#0078d4";
         style = "fg:#0078d4";
         format = "[  ($subscription)]($style)";
