@@ -1,0 +1,101 @@
+# Complete Package List for Arch Linux System
+# Generated on $(date)
+# Total packages: $(pacman -Q | wc -l)
+
+## Official Packages (pacman -Q)
+aardvark-dns abseil-cpp acl adwaita-cursors adwaita-fonts adwaita-icon-theme adwaita-icon-theme-legacy
+alacritty alsa-card-profiles alsa-lib alsa-topology-conf alsa-ucm-conf aom appstream aquamarine
+archlinux-keyring at-spi2-core atkmm attr audit autoconf automake avahi base base-devel
+bash bash-completion bat binutils bison blueberry blueprint-compiler bluez bluez-libs bluez-tools
+brightnessctl brotli btop btrfs-progs bubblewrap bzip2 c-ares ca-certificates ca-certificates-mozilla
+ca-certificates-utils cairo cairomm cantarell-fonts catatonit cbindgen cfitsio chromium clang
+clang19 compiler-rt compiler-rt19 conmon containerd containers-common coreutils cryptsetup cups
+cups-browsed cups-filters cups-pdf curl dav1d db5.3 dbus dbus-broker dbus-broker-units dbus-glib
+dbus-units dconf debugedit default-cursors desktop-file-utils device-mapper diffutils djvulibre
+dkms docker docker-buildx docker-compose dosfstools dotconf double-conversion duktape e2fsprogs
+efibootmgr efivar ell enchant evince exempi exiv2 expat eza fakeroot fastfetch fcitx5
+fcitx5-gtk fcitx5-qt fd ffmpeg ffmpegthumbnailer fftw file filesystem findutils flac flex
+fmt fontconfig foomatic-db-engine freetype2 fribidi fuse-common fuse2 fuse3 fzf gawk gc
+gcc gcc-libs gcr-4 gdbm gdk-pixbuf2 gettext ghostscript giflib git github-cli gjs glib-networking
+glib2 glibc glibmm glslang glu gmp gnome-autoar gnome-bluetooth gnome-desktop gnome-desktop-4
+gnome-desktop-common gnome-themes-extra gnulib-l10n gnupg gnutls gobject-introspection-runtime gperftools
+gpgme gpgmepp gpsd graphene graphite grep grim groff gsettings-desktop-schemas gsettings-system-schemas
+gsfonts gsm gspell gssdp gst-plugin-gtk gst-plugins-bad-libs gst-plugins-base-libs gstreamer gtest
+gtk-layer-shell gtk-update-icon-cache gtk3 gtk4 gtk4-layer-shell gtkmm3 gtksourceview4 guile gum
+gupnp gupnp-dlna gupnp-igd gvfs gvfs-mtp gzip harfbuzz hicolor-icon-theme hidapi highway hplip
+hwdata hyprcursor hyprgraphics hypridle hyprland hyprland-qt-support hyprland-qtutils hyprlang
+hyprlock hyprpicker hyprshot hyprsunset hyprutils hyprwayland-scanner iana-etc icu ijs imagemagick
+imake imath impala imv inetutils iproute2 iptables-nft iputils iso-codes iwd jack2 jansson
+jbig2dec jbigkit jq js128 json-c json-glib jsoncpp kbd keyutils kmod krb5 kvantum kvantum-qt5
+kwindowssystem l-smash lame lazygit lcms2 leancrypto less libadwaita libao libarchive libass
+libassuan libasyncns libatasmart libavc1394 libb2 libblockdev libblockdev-crypto libblockdev-fs
+libblockdev-loop libblockdev-mdraid libblockdev-nvme libblockdev-part libblockdev-swap libbluray libbpf
+libbs2b libbsd libbytesize libcanberra libcap libcap-ng libcdio libcdio-paranoia libcgif libcloudproviders
+libcolord libcue libcups libcupsfilters libdaemon libdatrie libdbusmenu-glib libdbusmenu-gtk3
+libde265 libdecor libdeflate libdisplay-info libdovi libdrm libdvdnav libdvdread libebur128 libedit
+libei libelf libepoxy libevdev libevent libexif libfdk-aac libffi libfontenc libfreeaptx libgcrypt
+libgexiv2 libgirepository libgit2 libglvnd libgnomekbd libgpg-error libgsf libgudev libgxps libhandy
+libheif libice libidn libidn2 libiec61883 libimagequant libimobiledevice libimobiledevice-glue libinih
+libinput libiptcdata libisl libjpeg-turbo libjxl libksba liblc3 libldac libldap libliftoff liblqr
+libluv libmd libmnl libmodplug libmpc libmpdclient libmtp libmysofa libnautilus-extension libnetfilter_conntrack
+libnfnetlink libnftnl libnghttp2 libnghttp3 libnice libnl libnotify libnsl libnvme libogg libopenmpt
+libosinfo libp11-kit libpaper libpcap libpciaccess libpgm libpipeline libpipewire libplacebo libplist
+libpng libportal libportal-gtk4 libppd libproxy libpsl libpulse libqalculate libraqm libraw1394
+librsvg libsamplerate libsasl libsass libseccomp libsecret libsigc++ libsixel libsm libsndfile
+libsodium libsoup3 libsoxr libspectre libspeechd libssh libssh2 libstemmer libsynctex libsysprof-capture
+libtasn1 libthai libtheora libtiff libtirpc libtool libunibreak libunistring libunwind liburing
+libusb libusbmuxd libutf8proc libuv libva libvdpau libverto libvips libvorbis libvpx libvterm
+libwacom libwebp libwireplumber libx11 libxau libxcb libxcomposite libxcrypt libxcursor libxcvt
+libxdamage libxdmcp libxext libxfixes libxfont2 libxft libxi libxinerama libxkbcommon libxkbcommon-x11
+libxkbfile libxklavier libxml2 libxmlb libxmu libxpresent libxrandr libxrender libxshmfence libxslt
+libxss libxt libxtst libxv libxxf86vm libyaml libzip licenses lilv linux-aarch64 linux-aarch64-headers
+linux-api-headers linux-firmware linux-firmware-amdgpu linux-firmware-atheros linux-firmware-broadcom
+linux-firmware-cirrus linux-firmware-intel linux-firmware-mediatek linux-firmware-nvidia linux-firmware-other
+linux-firmware-radeon linux-firmware-realtek linux-firmware-whence lld lld19 llhttp llvm llvm-libs
+llvm19-libs lm_sensors lmdb localsearch lua lua51-lpeg luajit lv2 lz4 lzo m4 mailcap make
+mako man-db mariadb-libs md4c mdadm mesa mesa-utils meson minizip mise mkinitcpio mkinitcpio-busybox
+mpdecimal mpfr mpg123 mpv msgpack-c mtdev mujs nasm nautilus ncurses neovim net-snmp net-tools
+netavark nettle nftables ninja node-gyp nodejs-lts-iron nodejs-nopt noto-fonts noto-fonts-emoji
+npth nspr nss nss-mdns ocl-icd oniguruma openal opencore-amr openexr openh264 openjpeg2 openssh
+openssl opus orc osinfo-db p11-kit pacman pacman-mirrorlist pam pambase pamixer pango pangomm
+parted passt patch pciutils pcre2 perl perl-alien-build perl-alien-libxml2 perl-capture-tiny
+perl-clone perl-dbi perl-error perl-ffi-checklib perl-file-chdir perl-file-which perl-mailtools
+perl-path-tiny perl-timedate perl-xml-libxml perl-xml-namespacesupport perl-xml-sax perl-xml-sax-base
+pinentry pipewire pipewire-audio pipewire-pulse pixman pkgconf playerctl plocate plymouth pnpm
+podman polkit polkit-gnome poppler poppler-data poppler-glib popt portaudio postgresql-libs
+power-profiles-daemon pps-tools procps-ng psmisc pugixml python python-autocommand python-build
+python-cairo python-colorama python-dbus python-distro python-fastjsonschema python-gobject python-installer
+python-jaraco.collections python-jaraco.context python-jaraco.functools python-jaraco.text python-jinja
+python-lark-parser python-markupsafe python-more-itertools python-packaging python-platformdirs
+python-poetry-core python-pyproject-hooks python-pyqt6 python-pyqt6-sip python-pyqt6-webengine python-pyxdg
+python-setproctitle python-setuptools python-shtab python-termcolor python-tqdm python-typing_extensions
+python-wheel python-yaml qpdf qt5-base qt5-svg qt5-translations qt5-x11extras qt6-base qt6-declarative
+qt6-positioning qt6-svg qt6-translations qt6-wayland qt6-webchannel qt6-webengine qutebrowser re2
+readline ripgrep rsync rtkit rubberband runc rust sassc satty sbc sdbus-cpp sdl2-compat sdl3
+seatd sed semver serd shaderc shadow shared-mime-info slurp snappy sndio sord sound-theme-freedesktop
+spdlog speech-dispatcher speex speexdsp spirv-tools sqlite sratom srt sudo sushi swaybg swayosd
+system-config-printer systemd systemd-libs systemd-sysvcompat tar tdb terminus-font texinfo tinysparql
+tldr tomlplusplus totem-pl-parser tpm2-tss tree-sitter tree-sitter-c tree-sitter-lua tree-sitter-markdown
+tree-sitter-query tree-sitter-vim tree-sitter-vimdoc tslib ttf-cascadia-mono-nerd ttf-liberation tzdata
+uchardet udisks2 ufw unibilium unzip upower util-linux util-linux-libs uwsm v4l-utils vapoursynth
+vid.stab volume_key vulkan-icd-loader wasi-compiler-rt wasi-libc wasi-libc++ wasi-libc++abi waybar
+wayland wayland-protocols webrtc-audio-processing-1 wget which whois wiremix wireplumber wl-clip-persist
+wl-clipboard woff2-font-awesome x264 x265 xapp xcb-imdkit xcb-proto xcb-util xcb-util-cursor
+xcb-util-errors xcb-util-image xcb-util-keysyms xcb-util-renderutil xcb-util-wm xdg-desktop-portal
+xdg-desktop-portal-gtk xdg-desktop-portal-hyprland xdg-user-dirs xdg-user-dirs-gtk xdg-utils xkeyboard-config
+xmlstarlet xorg-fonts-encodings xorg-server-common xorg-server-xvfb xorg-setxkbmap xorg-xauth xorg-xkbcomp
+xorg-xprop xorg-xset xorg-xwayland xorgproto xvidcore xxhash xz yasm yyjson zeromq zig zimg
+zip zix zlib zlib-ng zoxide zstd
+
+## AUR Packages (pacman -Qm)
+brave-bin ghostty-shell-integration-git ghostty-terminfo-git k3s-bin lazydocker-bin pandoc-bin
+python-terminaltexteffects teams-for-linux-bin ttf-ia-writer tzupdate ufw-docker walker-bin
+wl-screenrec yaru-icon-theme yay-bin zen-browser-bin
+
+## Additional AUR Packages from yay cache
+k3s teams-for-linux-bin
+
+## Total Count
+Official packages: 400+
+AUR packages: 16
+Total packages: 416+

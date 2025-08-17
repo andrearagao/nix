@@ -2,8 +2,7 @@
   config,
   pkgs,
   ...
-}:
-{
+}: {
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
@@ -37,6 +36,12 @@
       JAVA_HOME = "${pkgs.jdk17}";
       JAVA_OPTS = "-Xmx4g -XX:+UseG1GC";
 
+      # Python warnings configuration
+      PYTHONWARNINGS = "ignore::FutureWarning";
+      
+      # UV configuration
+      UV_PYTHON_DOWNLOADS = "never";
+
       # Make Nix applications visible to application launchers
       XDG_DATA_DIRS = "$HOME/.nix-profile/share:$XDG_DATA_DIRS";
 
@@ -49,9 +54,38 @@
     };
   };
 
+  programs.bash = {
+    enable = true;
+    shellAliases = {
+      ls = "eza -lh --group-directories-first --icons=auto";
+      ll = "ls -la";
+      la = "ls -A";
+      l = "ls -CF";
+      cd = "z";
+      ".." = "z ..";
+      "..." = "z ../..";
+      v = "nvim";
+      vi = "nvim";
+      vim = "nvim";
+      gs = "git status";
+      ga = "git add";
+      gc = "git commit";
+      gp = "git push";
+      gl = "git log --oneline";
+      gd = "git diff";
+      gb = "git branch";
+      gco = "git checkout";
+      y = "yazi";
+      qb = "qutebrowser";
+      qbw = "qutebrowser --temp-window";
+      qbp = "qutebrowser --private";
+    };
+  };
+
   programs.fish = {
     enable = true;
     shellAliases = {
+      ls = "eza -lh --group-directories-first --icons=auto";
       ll = "ls -la";
       la = "ls -A";
       l = "ls -CF";
@@ -155,7 +189,7 @@
 
       # Custom fish greeting with fastfetch and fortune
       function fish_greeting
-        fastfetch
+        #fastfetch
         echo ""
         fortune|lolcat
       end
@@ -299,17 +333,17 @@
         symbol = " ";
       };
       git_status = {
-        disabled = true;
+        disabled = false;
       };
       git_branch = {
-        disabled = true;
+        disabled = false;
         symbol = " ";
         #style = "bg:#f34c28 fg:#413932";
         style = "fg:#f34c28";
         format = "[  $symbol$branch(:$remote_branch)]($style)";
       };
       azure = {
-        disabled = true;
+        disabled = false;
         #style = "fg:#ffffff bg:#0078d4";
         style = "fg:#0078d4";
         format = "[  ($subscription)]($style)";
@@ -322,7 +356,7 @@
         style = "fg:#2e6ce6";
         #format = "\\[[󱃾 :($cluster)]($style)\\]";
         format = "[ 󱃾 ($cluster)]($style)";
-        disabled = true;
+        disabled = false;
       };
       docker_context = {
         disabled = false;
@@ -671,7 +705,7 @@
           }
           {
             mime = "image/*";
-            use = [ "open" ];
+            use = ["open"];
           }
           {
             mime = "video/*";
@@ -700,7 +734,7 @@
     keymap = {
       mgr.prepend_keymap = [
         {
-          on = [ "l" ];
+          on = ["l"];
           run = "plugin --sync smart-enter";
           desc = "Enter the child directory, or open the file";
         }
@@ -713,7 +747,7 @@
           desc = "Move cursor to the top";
         }
         {
-          on = [ "G" ];
+          on = ["G"];
           run = "arrow 99999999";
           desc = "Move cursor to the bottom";
         }
@@ -785,6 +819,11 @@
     nodePackages.typescript-language-server
     nodePackages.bash-language-server
     marksman
+    python3Packages.python-lsp-server
+    
+    # Python development with uv
+    uv
+    python3
 
     # Fonts
     fira-code
@@ -826,6 +865,7 @@
     # Password Management
     bitwarden-cli
     bitwarden
+    bottom
   ];
 
   # Nix configuration
@@ -851,7 +891,7 @@
     services.notes-sync = {
       Unit = {
         Description = "Auto-sync notes repository";
-        After = [ "graphical-session.target" ];
+        After = ["graphical-session.target"];
       };
       Service = {
         Type = "oneshot";
@@ -899,7 +939,7 @@
         Persistent = true;
       };
       Install = {
-        WantedBy = [ "timers.target" ];
+        WantedBy = ["timers.target"];
       };
     };
   };
@@ -969,7 +1009,7 @@
       "nix.enable" = true;
       "nix.serverPath" = "nil";
       "nix.formatterPath" = "nixfmt";
-      "nix.serverSettings.nil.formatting.command" = [ "nixfmt" ];
+      "nix.serverSettings.nil.formatting.command" = ["nixfmt"];
       "nix.serverSettings.nil.diagnostics.ignored" = [
         "unused_binding"
         "unused_with"
@@ -1022,9 +1062,9 @@
 
       "terminal.integrated.defaultProfile.linux" = "fish";
       "terminal.integrated.profiles.linux.fish.path" = "/home/aragao/.nix-profile/bin/fish";
-      "terminal.integrated.profiles.linux.fish.args" = [ "-l" ];
+      "terminal.integrated.profiles.linux.fish.args" = ["-l"];
       "terminal.integrated.profiles.linux.bash.path" = "/usr/bin/bash";
-      "terminal.integrated.profiles.linux.bash.args" = [ "-l" ];
+      "terminal.integrated.profiles.linux.bash.args" = ["-l"];
 
       "workbench.colorTheme" = "Default Dark+";
       "workbench.iconTheme" = "material-icon-theme";
@@ -1047,10 +1087,10 @@
       "go.gocodeAutoBuild" = false;
 
       "terraform.languageServer.enabled" = true;
-      "terraform.languageServer.args" = [ "serve" ];
+      "terraform.languageServer.args" = ["serve"];
       "terraform.format.enabled" = true;
       "terraform.format.formatOnSave" = true;
-      "terraform.format.ignoreExtensionsOnSave" = [ ".tfsmurf" ];
+      "terraform.format.ignoreExtensionsOnSave" = [".tfsmurf"];
 
       "yaml.format.enable" = true;
       "yaml.format.singleQuote" = false;
@@ -1059,18 +1099,15 @@
       "yaml.validate" = true;
       "yaml.schemas" = {
         "https://json.schemastore.org/github-workflow.json" = ".github/workflows/*.{yml,yaml}";
-        "https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json" =
-          "**/docker-compose*.{yml,yaml}";
-        "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/kubernetes.json" =
-          "**/*.k8s.{yml,yaml}";
+        "https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json" = "**/docker-compose*.{yml,yaml}";
+        "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/kubernetes.json" = "**/*.k8s.{yml,yaml}";
       };
 
       # Java development settings
       "java.home" = "";
       "java.configuration.updateBuildConfiguration" = "automatic";
       "java.compile.nullAnalysis.mode" = "automatic";
-      "java.format.settings.url" =
-        "https://raw.githubusercontent.com/google/styleguide/gh-pages/eclipse-java-google-style.xml";
+      "java.format.settings.url" = "https://raw.githubusercontent.com/google/styleguide/gh-pages/eclipse-java-google-style.xml";
       "java.format.settings.profile" = "GoogleStyle";
 
       # Vim keybindings
@@ -1108,7 +1145,7 @@
       # vscode-neovim configuration with performance optimizations
       "vscode-neovim.enable" = true;
       "vscode-neovim.useWSL" = false;
-      "vscode-neovim.highlightGroups.highlights" = [ ];
+      "vscode-neovim.highlightGroups.highlights" = [];
 
       # Performance optimizations for vscode-neovim
       "vscode-neovim.affinity" = "default";
@@ -1131,7 +1168,6 @@
 
       # Editor line numbers
       "editor.lineNumbers" = "relative";
-
     };
   };
 }
