@@ -1,0 +1,42 @@
+#!/bin/sh
+# set -x
+function get_k8s_output(){
+  local output
+  if [ -f ~/.kube/config ]; then
+    output="$(grep 'current-context:' ~/.kube/config | awk '{print $2}')"
+    if [ -n "$output" ]; then
+      output="#[fg=#2e6ce6,bold,bg=default]󱃾 $output"
+    fi
+  fi
+  echo $output
+}
+
+function get_az_output(){
+  local output
+  if [ -f ~/.config/azure/azureProfile.json ]; then
+    output=$(jq -r '.subscriptions[] | select(.isDefault==true) | .name' ~/.config/azure/azureProfile.json)
+    if [ -n "$output" ]; then
+      output="#[fg=#0078d4,bold,bg=default] $output"
+    fi
+  fi
+  echo $output
+}
+
+function get_project_output(){
+  local output
+  local project_dir
+  project_dir="$(tmux show-environment TMUX_SESSION_ROOT_DIR|cut -d'=' -f2|awk -F/ '{print $(NF-1)"/"$NF}')"
+  if [ -n "$project_dir" ]; then
+    output="#[fg=#ebbcba] $project_dir"
+  else
+    output="#[fg=#ebbcba] $(pwd)"
+  fi
+  echo $output
+}
+
+function get_git_output(){
+  echo $(tmux-git-status)
+}
+
+echo $(get_git_output) $(get_k8s_output) $(get_az_output) $(get_project_output)
+#vim: set filetype=sh:

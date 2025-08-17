@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+#set -x
+set -e
+if [[ $# -eq 1 ]]; then
+  selected=$1
+else
+ #find ~/projects/personal ~/projects/work -mindepth 1 -maxdepth 1 -type d|awk -F/ '{print $(NF-1)"/"$NF}'
+ selected=$(find -L ~/projects/work ~/projects/personal -mindepth 1 -maxdepth 1 -type d |awk -F/ '{print $(NF-1)"/"$NF}'| fzf --preview 'bat --color=always ~/projects/{}/README.md 2>/dev/null||bat --color=always ~/projects/{}/readme.md 2>/dev/null||tree -C ~/projects/{}' )
+fi
+
+if [[ -z $selected ]]; then    
+  exit 0
+fi
+
+selected=~/projects/"$selected"
+selected_name=$(basename "$selected" | tr . _)
+tmux_running=$(pgrep tmux)
+
+if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
+  tmux new-session -s $selected_name -c $selected
+  exit 0
+fi
+
+new_session_flag=0
+if ! tmux has-session -t=$selected_name 2> /dev/null; then
+  tmux new-session -ds $selected_name -c $selected
+  tmux set-environment -t $selected_name TMUX_SESSION_ROOT_DIR $selected
+  new_session_flag=1
+fi
+
+tmux switch-client -t $selected_name
+if [ $new_session_flag -eq 1 ]; then
+  if [[ -e ${selected}/.tmux-setup.sh ]]; then
+    cd ${selected}
+    source ${selected}/.tmux-setup.sh ${selected_name}
+  fi
+fi
+
+
+# vim: set filetype=bash :

@@ -1,0 +1,17 @@
+#!/bin/sh
+
+declare -A icons
+
+icons["fish"]="󰈺 ";
+icons["nvim"]=" ";
+icons["vi"]=" ";
+icons["vim"]=" ";
+icons["lazydocker"]=" ";
+icons["lazygit"]=" ";
+icons["k9s"]="󱃾 ";
+icons["lf"]=" ";
+icons["python"]=" ";
+
+echo "${icons[$1]}$1"
+
+# vim: set filetype=sh:

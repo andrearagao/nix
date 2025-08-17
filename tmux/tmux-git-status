@@ -1,0 +1,49 @@
+#!/bin/bash
+# Function to get the current Git branch
+get_git_branch() {
+	# Use git symbolic-ref or git rev-parse to retrieve the branch name
+	local branch_name=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null)
+	echo "$branch_name"
+}
+
+# Function to get the Git status
+get_git_status() {
+	local status=$(git status --porcelain 2>/dev/null)
+	local output=""
+
+	if [[ -n $status ]]; then
+		# Check for modified files
+		if echo "$status" | grep -q '^.M\|M.$'; then
+			output+="*"
+		fi
+		# Check for added files
+		if echo "$status" | grep -q '^A'; then
+			output+="+"
+		fi
+		# Check for deleted files
+		if echo "$status" | grep -q '^.D\|D.$'; then
+			output+="-"
+		fi
+		# Check for renamed files
+		if echo "$status" | grep -q '^.R\|R.$'; then
+			output+=">"
+		fi
+		# Check for untracked files
+		if echo "$status" | grep -q '^??'; then
+			output+="?"
+		fi
+	fi
+
+	echo "$output"
+}
+
+# Main script execution
+branch=$(get_git_branch)
+if [[ -n $branch ]]; then
+	git_status=$(get_git_status)
+	echo "#[fg=#f34c28]  $branch#[fg=#eb6f92][$git_status]"
+else
+	echo ""
+fi
+
+#vim: set filetype=sh:
