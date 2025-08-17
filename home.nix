@@ -2,7 +2,8 @@
   config,
   pkgs,
   ...
-}: {
+}:
+{
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
@@ -38,7 +39,7 @@
 
       # Python warnings configuration
       PYTHONWARNINGS = "ignore::FutureWarning";
-      
+
       # UV configuration
       UV_PYTHON_DOWNLOADS = "never";
 
@@ -543,13 +544,13 @@
       set -g status-position top
       set -g status-bg "#191724"
       set -g status-fg "#e0def4"
-      set -g status-left ""
-      set -g status-right "#[fg=#9ccfd8,bg=#393552] %Y-%m-%d #[fg=#f6c177,bg=#393552] %H:%M:%S "
+      set -g status-left "#[fg=blue,bold,bg=default] #S "
+      set -g status-right "#(tmux-right-status)#[fg=#9ccfd8,bg=#393552] %Y-%m-%d #[fg=#f6c177,bg=#393552] %H:%M:%S "
       set -g status-right-length 50
       set -g status-left-length 20
 
-      setw -g window-status-current-format " #[fg=#eb6f92,bg=#393552]#I#[fg=#e0def4,bg=#393552] #[fg=#e0def4,bg=#393552]#W #[fg=#c4a7e7,bg=#393552]#F "
-      setw -g window-status-format " #[fg=#6e6a86]#I#[fg=#6e6a86] #W #[fg=#6e6a86]#F "
+      setw -g window-status-current-format " #[fg=#eb6f92,bg=#393552]#I#[fg=#e0def4,bg=#393552] #[fg=#e0def4,bg=#393552]#(tmux-window-icons #W) #[fg=#c4a7e7,bg=#393552]#F "
+      setw -g window-status-format " #[fg=#6e6a86]#I#[fg=#6e6a86] #(tmux-window-icons #W) #[fg=#6e6a86]#F "
 
       # Pane borders
       set -g pane-border-style "fg=#393552"
@@ -577,12 +578,17 @@
       bind C-p previous-window
       bind C-n next-window
 
+      # Custom tmux sessionizer binding
+      bind -r D neww -c "#{pane_current_path}" "[[ -e TODO.md ]] && nvim TODO.md || nvim ~/src/notes/todo.md"
+      bind -r f display-popup -E "tmux-sessionizer"
+
       # Source config file
       bind r source-file ~/.config/tmux/tmux.conf \; display "Config reloaded!"
 
       # Better splitting
-      #bind | split-window -h -c "#{pane_current_path}"
-      #bind - split-window -v -c "#{pane_current_path}"
+      bind % split-window -h -c "#{pane_current_path}"
+      bind '"' split-window -p 30 -v -c "#{pane_current_path}"
+      bind c new-window -c "#{pane_current_path}"
 
       # Activity monitoring
       setw -g monitor-activity on
@@ -590,6 +596,13 @@
 
       bind-key -T copy-mode-vi v send-keys -X begin-selection
       bind-key -T copy-mode-vi y send-keys -X copy-selection-and-cancel
+
+      # vim-like pane switching
+      bind -r ^ last-window
+      bind -r k select-pane -U
+      bind -r j select-pane -D
+      bind -r h select-pane -L
+      bind -r l select-pane -R
     '';
 
     plugins = with pkgs.tmuxPlugins; [
@@ -705,7 +718,7 @@
           }
           {
             mime = "image/*";
-            use = ["open"];
+            use = [ "open" ];
           }
           {
             mime = "video/*";
@@ -734,7 +747,7 @@
     keymap = {
       mgr.prepend_keymap = [
         {
-          on = ["l"];
+          on = [ "l" ];
           run = "plugin --sync smart-enter";
           desc = "Enter the child directory, or open the file";
         }
@@ -747,7 +760,7 @@
           desc = "Move cursor to the top";
         }
         {
-          on = ["G"];
+          on = [ "G" ];
           run = "arrow 99999999";
           desc = "Move cursor to the bottom";
         }
@@ -820,7 +833,7 @@
     nodePackages.bash-language-server
     marksman
     python3Packages.python-lsp-server
-    
+
     # Python development with uv
     uv
     python3
@@ -866,6 +879,32 @@
     bitwarden-cli
     bitwarden
     bottom
+
+    # Custom tmux scripts
+    (
+      let
+        scriptContent = builtins.readFile ./tmux/tmux-sessionizer;
+      in
+      writeShellScriptBin "tmux-sessionizer" scriptContent
+    )
+    (
+      let
+        scriptContent = builtins.readFile ./tmux/tmux-window-icons;
+      in
+      writeShellScriptBin "tmux-window-icons" scriptContent
+    )
+    (
+      let
+        scriptContent = builtins.readFile ./tmux/tmux-right-status;
+      in
+      writeShellScriptBin "tmux-right-status" scriptContent
+    )
+    (
+      let
+        scriptContent = builtins.readFile ./tmux/tmux-git-status;
+      in
+      writeShellScriptBin "tmux-git-status" scriptContent
+    )
   ];
 
   # Nix configuration
@@ -891,7 +930,7 @@
     services.notes-sync = {
       Unit = {
         Description = "Auto-sync notes repository";
-        After = ["graphical-session.target"];
+        After = [ "graphical-session.target" ];
       };
       Service = {
         Type = "oneshot";
@@ -939,7 +978,7 @@
         Persistent = true;
       };
       Install = {
-        WantedBy = ["timers.target"];
+        WantedBy = [ "timers.target" ];
       };
     };
   };
@@ -1009,7 +1048,7 @@
       "nix.enable" = true;
       "nix.serverPath" = "nil";
       "nix.formatterPath" = "nixfmt";
-      "nix.serverSettings.nil.formatting.command" = ["nixfmt"];
+      "nix.serverSettings.nil.formatting.command" = [ "nixfmt" ];
       "nix.serverSettings.nil.diagnostics.ignored" = [
         "unused_binding"
         "unused_with"
@@ -1062,9 +1101,9 @@
 
       "terminal.integrated.defaultProfile.linux" = "fish";
       "terminal.integrated.profiles.linux.fish.path" = "/home/aragao/.nix-profile/bin/fish";
-      "terminal.integrated.profiles.linux.fish.args" = ["-l"];
+      "terminal.integrated.profiles.linux.fish.args" = [ "-l" ];
       "terminal.integrated.profiles.linux.bash.path" = "/usr/bin/bash";
-      "terminal.integrated.profiles.linux.bash.args" = ["-l"];
+      "terminal.integrated.profiles.linux.bash.args" = [ "-l" ];
 
       "workbench.colorTheme" = "Default Dark+";
       "workbench.iconTheme" = "material-icon-theme";
@@ -1087,10 +1126,10 @@
       "go.gocodeAutoBuild" = false;
 
       "terraform.languageServer.enabled" = true;
-      "terraform.languageServer.args" = ["serve"];
+      "terraform.languageServer.args" = [ "serve" ];
       "terraform.format.enabled" = true;
       "terraform.format.formatOnSave" = true;
-      "terraform.format.ignoreExtensionsOnSave" = [".tfsmurf"];
+      "terraform.format.ignoreExtensionsOnSave" = [ ".tfsmurf" ];
 
       "yaml.format.enable" = true;
       "yaml.format.singleQuote" = false;
@@ -1099,15 +1138,18 @@
       "yaml.validate" = true;
       "yaml.schemas" = {
         "https://json.schemastore.org/github-workflow.json" = ".github/workflows/*.{yml,yaml}";
-        "https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json" = "**/docker-compose*.{yml,yaml}";
-        "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/kubernetes.json" = "**/*.k8s.{yml,yaml}";
+        "https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json" =
+          "**/docker-compose*.{yml,yaml}";
+        "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/kubernetes.json" =
+          "**/*.k8s.{yml,yaml}";
       };
 
       # Java development settings
       "java.home" = "";
       "java.configuration.updateBuildConfiguration" = "automatic";
       "java.compile.nullAnalysis.mode" = "automatic";
-      "java.format.settings.url" = "https://raw.githubusercontent.com/google/styleguide/gh-pages/eclipse-java-google-style.xml";
+      "java.format.settings.url" =
+        "https://raw.githubusercontent.com/google/styleguide/gh-pages/eclipse-java-google-style.xml";
       "java.format.settings.profile" = "GoogleStyle";
 
       # Vim keybindings
@@ -1145,7 +1187,7 @@
       # vscode-neovim configuration with performance optimizations
       "vscode-neovim.enable" = true;
       "vscode-neovim.useWSL" = false;
-      "vscode-neovim.highlightGroups.highlights" = [];
+      "vscode-neovim.highlightGroups.highlights" = [ ];
 
       # Performance optimizations for vscode-neovim
       "vscode-neovim.affinity" = "default";
